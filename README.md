@@ -59,6 +59,7 @@ DJANGO_SECRET_KEY=your_secret_key
 ALLOWED_HOST=your_domain_name,web
 CORS_ORIGIN_WHITELIST=http://localhost,http://web
 CSRF_TRUSTED_ORIGINS=http://localhost,http://web
+FORCE_SCRIPT_NAME=/api
 ```
 
 Replace `your_postgres_user`, `your_postgres_password`, `your_postgres_db`, `your_secret_key`, and `your_domain_name` with your actual PostgreSQL user, password, database name, Django secret key, and the domain name of your application.
@@ -70,6 +71,18 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 The application will be available at `http://your_domain_name` or `http://localhost` (when running production locally).
+
+## API Endpoints
+
+The application includes the following main endpoints:
+
+- `admin/`: Django admin site.
+- `api/token/`: Obtain a pair of JWT tokens (access and refresh).
+- `api/token/refresh/`: Refresh the JWT access token.
+- `api/`: Main API endpoint, includes all the application-specific routes.
+- `api-auth/`: Django Rest Framework's login and logout views.
+
+For detailed API documentation, visit the Swagger UI at the root URL (`/`).
 
 ## Static and Media Files
 
