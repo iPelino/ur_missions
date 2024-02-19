@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from accounts.models import CustomUser
 from core.models import College, Unit, Department, Campus, Staff
+from django.contrib.auth.models import Group, Permission
 
 
 class BaseSerializer(serializers.ModelSerializer):
@@ -39,7 +40,16 @@ class BaseWriteSerializer(BaseSerializer):
         return value
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    groups = serializers.StringRelatedField(
+        many=True,
+        read_only=True,
+    )
+    user_permissions = serializers.StringRelatedField(
+        many=True,
+        read_only=True,
+    )
+
     class Meta:
         model = CustomUser
         fields = ('id', 'email', 'is_active', 'is_staff', 'date_joined', 'last_login', 'groups', 'user_permissions')
@@ -96,7 +106,7 @@ class CampusSerializer(BaseSerializer):
 
 
 class StaffReadSerializer(BaseSerializer):
-    user = CustomUserSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     unit = UnitReadSerializer(read_only=True)
     campus = CampusSerializer(read_only=True)
 

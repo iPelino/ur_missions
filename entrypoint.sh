@@ -11,5 +11,6 @@ wait_for_postgres() {
 }
 
 python manage.py migrate --noinput
+python manage.py create_groups_and_permissions
 python manage.py collectstatic --noinput
 exec "$@"

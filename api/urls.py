@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CustomUserViewSet, CollegeViewSet, CampusViewSet, DepartmentRetrieveUpdateDestroyView, \
+from .views import UserViewSet, CollegeViewSet, CampusViewSet, DepartmentRetrieveUpdateDestroyView, \
     DepartmentCreateView, UnitRetrieveUpdateDestroyView, UnitCreateView, StaffCreateView, StaffRetrieveUpdateDestroyView
 
 router = DefaultRouter()
-router.register(r'users', CustomUserViewSet)
+router.register(r'users', UserViewSet)
 router.register(r'campuses', CampusViewSet)
 router.register(r'colleges', CollegeViewSet)
 
