@@ -1,5 +1,7 @@
 #!/bin/sh
+mkdir -p /code/logs/
 
+touch /code/logs/error.log
 
 # Function to check if PostgreSQL is ready
 wait_for_postgres() {
