@@ -2,9 +2,11 @@ from django.core.management.utils import get_random_secret_key
 
 from .base import *
 
+load_dotenv()
+
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST').split(',')
 
 SECRET_KEY = get_random_secret_key()
 
@@ -16,6 +18,7 @@ DATABASES = {
 }
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_URL = '/media/'
 
 
