@@ -9,7 +9,7 @@ wait_for_postgres() {
   done
   echo "PostgreSQL is available"
 }
-
+python manage.py makemigrations
 python manage.py migrate --noinput
 python manage.py create_groups_and_permissions
 python manage.py collectstatic --noinput

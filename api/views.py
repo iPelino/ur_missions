@@ -1,13 +1,15 @@
 from rest_framework import generics, status
 from rest_framework import viewsets
 from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
 from accounts.models import CustomUser
-from core.models import College, Unit, Department, Campus, Staff
+from core.models import College, Unit, Department, Campus, Staff, MissionOrder, Approval
 from api.serializers import CollegeSerializer, UnitReadSerializer, DepartmentReadSerializer, CampusSerializer, \
     StaffReadSerializer, \
-    UserSerializer, UnitWriteSerializer, DepartmentWriteSerializer, StaffWriteSerializer
+    UserSerializer, UnitWriteSerializer, DepartmentWriteSerializer, StaffWriteSerializer, MissionOrderReadSerializer, \
+    MissionOrderWriteSerializer, MissionOrderApprovalSerializer
 
 
 class IsUnitManager(BasePermission):
@@ -94,3 +96,42 @@ class StaffCreateView(generics.CreateAPIView):
     queryset = Staff.objects.all()
     serializer_class = StaffWriteSerializer
     permission_classes = [IsAuthenticated & IsUnitManager & IsSuperuser]
+
+
+class MissionOrderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = MissionOrder.objects.all()
+    serializer_class = MissionOrderReadSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return MissionOrderReadSerializer
+        else:
+            return MissionOrderWriteSerializer
+
+
+class MissionOrderCreateView(generics.CreateAPIView):
+    queryset = MissionOrder.objects.all()
+    serializer_class = MissionOrderWriteSerializer
+    permission_classes = [IsAuthenticated & (IsUnitManager | IsSuperuser)]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        data['staff'] = request.user.staff.id
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class MissionApprovalCreateView(generics.CreateAPIView):
+    queryset = Approval.objects.all()
+    serializer_class = MissionOrderApprovalSerializer
+    permission_classes = [IsAuthenticated & (IsUnitManager | IsAdmin | IsCampusManager, IsSuperuser)]
+
+
+class MissionApprovalUpdateView(generics.UpdateAPIView):
+    queryset = Approval.objects.all()
+    serializer_class = MissionOrderApprovalSerializer
+    permission_classes = [IsAuthenticated & (IsAdmin | IsCampusManager | IsUnitManager | IsSuperuser)]
