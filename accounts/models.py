@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -42,11 +43,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         domain = self.email.split('@')[-1]
         if domain != 'ur.ac.rw':
-            raise ValueError('Only UR email addresses are allowed')
-        super().save(*args, **kwargs)
+            raise ValidationError('Only UR email addresses are allowed')
+        super().clean()
 
     def __str__(self):
         return self.email
