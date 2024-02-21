@@ -6,7 +6,7 @@ load_dotenv()
 
 DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST').split(',')
+ALLOWED_HOSTS = ['localhost', 'web', '0.0.0.0']
 
 SECRET_KEY = get_random_secret_key()
 
