@@ -14,11 +14,16 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
+
 from django.contrib import admin
 from django.urls import path, include, re_path
+from dotenv import load_dotenv
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+load_dotenv()
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -30,7 +35,7 @@ schema_view = get_schema_view(
         license=openapi.License(name="BSD License"),
     ),
     public=True,
-    url='http://localhost/api/'
+    url=os.environ.get('SWAGGER_URL')
 )
 
 urlpatterns = [

@@ -42,18 +42,43 @@ class BaseWriteSerializer(BaseSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    groups = serializers.StringRelatedField(
+    password = serializers.CharField(write_only=True)
+    groups = serializers.PrimaryKeyRelatedField(
         many=True,
-        read_only=True,
+        queryset=Group.objects.all(),
     )
-    user_permissions = serializers.StringRelatedField(
-        many=True,
-        read_only=True,
-    )
+    permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'is_active', 'is_staff', 'date_joined', 'last_login', 'groups', 'user_permissions')
+        fields = (
+            'id', 'email', 'password', 'is_active', 'is_staff', 'date_joined', 'last_login', 'groups', 'permissions')
+
+        extra_kwargs = {
+            'date_joined': {'read_only': True},
+            'last_login': {'read_only': True},
+            'password': {'write_only': True},
+            'permissions': {'read_only': True},
+        }
+
+    def get_permissions(self, obj):
+        return ([perm.codename for perm in obj.user_permissions.all()] +
+                [perm.codename for perm in Permission.objects.filter(group__user=obj)])
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = super().create(validated_data)
+        user.set_password(password)
+        user.save()
+
+    def validate(self, attrs):
+        groups = attrs.get('groups', [])
+        request = self.context.get('request')
+        if request and not request.user.is_superuser:
+            superuser_group = Group.objects.get(name='Superuser')
+            if superuser_group in groups:
+                raise serializers.ValidationError("Only a superuser can add someone to the superuser group.")
+        return attrs
 
 
 class CollegeSerializer(BaseSerializer):
@@ -248,4 +273,3 @@ class MissionOrderApprovalSerializer(BaseSerializer):
         model = Approval
         fields = ('id', 'mission_order', 'approver', 'status', 'approval_date', 'comments', 'rejected',
                   'rejection_reason', 'created', 'modified')
-

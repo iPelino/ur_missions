@@ -32,14 +32,21 @@ class IsSuperuser(BasePermission):
         return request.user.groups.filter(name='Superuser').exists()
 
 
+class IsSuperuserOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.groups.filter(name__in=['Superuser', 'Admin']).exists()
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated & IsSuperuserOrAdmin]
 
 
 class CollegeViewSet(viewsets.ModelViewSet):
     queryset = College.objects.all()
     serializer_class = CollegeSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class UnitRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -95,7 +102,7 @@ class StaffRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 class StaffCreateView(generics.CreateAPIView):
     queryset = Staff.objects.all()
     serializer_class = StaffWriteSerializer
-    permission_classes = [IsAuthenticated & IsUnitManager & IsSuperuser]
+    permission_classes = [IsAuthenticated & (IsUnitManager & IsSuperuserOrAdmin)]
 
 
 class MissionOrderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -113,7 +120,7 @@ class MissionOrderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVie
 class MissionOrderCreateView(generics.CreateAPIView):
     queryset = MissionOrder.objects.all()
     serializer_class = MissionOrderWriteSerializer
-    permission_classes = [IsAuthenticated & (IsUnitManager | IsSuperuser)]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -128,10 +135,10 @@ class MissionOrderCreateView(generics.CreateAPIView):
 class MissionApprovalCreateView(generics.CreateAPIView):
     queryset = Approval.objects.all()
     serializer_class = MissionOrderApprovalSerializer
-    permission_classes = [IsAuthenticated & (IsUnitManager | IsAdmin | IsCampusManager, IsSuperuser)]
+    permission_classes = [IsAuthenticated & (IsUnitManager | IsCampusManager, IsSuperuserOrAdmin)]
 
 
 class MissionApprovalUpdateView(generics.UpdateAPIView):
     queryset = Approval.objects.all()
     serializer_class = MissionOrderApprovalSerializer
-    permission_classes = [IsAuthenticated & (IsAdmin | IsCampusManager | IsUnitManager | IsSuperuser)]
+    permission_classes = [IsAuthenticated & (IsAdmin | IsCampusManager | IsUnitManager | IsSuperuserOrAdmin)]
